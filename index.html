@@ -1,0 +1,1583 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教师课时量计算系统 - 最终优化版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #4a6fa5;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 16px;
+        }
+        
+        .formula {
+            background-color: #e8f4fc;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin: 10px 0 20px 0;
+            font-size: 14px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .formula strong {
+            color: #e74c3c;
+        }
+        
+        .panel {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        h2 {
+            color: #3498db;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        h3 {
+            color: #2c3e50;
+            margin: 20px 0 10px 0;
+            font-size: 16px;
+            text-align: center;
+        }
+        
+        h4 {
+            color: #2c3e50;
+            margin: 15px 0 8px 0;
+            font-size: 15px;
+        }
+        
+        .upload-section {
+            text-align: center;
+        }
+        
+        .file-input {
+            margin: 20px 0;
+        }
+        
+        input[type="file"] {
+            padding: 10px;
+            border: 2px dashed #3498db;
+            border-radius: 5px;
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+        
+        .coeff-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 15px;
+        }
+        
+        .grade-section {
+            flex: 1;
+            min-width: 300px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        
+        .batch-input-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .batch-input-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr auto;
+            gap: 10px;
+            align-items: end;
+            margin-bottom: 10px;
+        }
+        
+        .batch-input-row input, .batch-input-row textarea {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .batch-input-row textarea {
+            min-height: 60px;
+            resize: vertical;
+        }
+        
+        .batch-help {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .subject-list {
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            padding: 10px;
+        }
+        
+        .subject-item {
+            display: grid;
+            grid-template-columns: 2fr 1fr auto;
+            gap: 10px;
+            padding: 8px;
+            border-bottom: 1px solid #f0f0f0;
+            align-items: center;
+        }
+        
+        .subject-item:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .subject-item-header {
+            font-weight: bold;
+            background-color: #f1f8ff;
+            position: sticky;
+            top: 0;
+        }
+        
+        .clear-all {
+            text-align: right;
+            margin-top: 10px;
+        }
+        
+        .save-load-section {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f1f8ff;
+            border-radius: 8px;
+            border: 1px solid #d1ecf1;
+        }
+        
+        .save-load-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-save {
+            background-color: #27ae60;
+        }
+        
+        .btn-load {
+            background-color: #f39c12;
+        }
+        
+        .btn-export-settings {
+            background-color: #9b59b6;
+        }
+        
+        .btn-import-settings {
+            background-color: #1abc9c;
+        }
+        
+        .save-info {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 10px;
+        }
+        
+        .last-save-time {
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: #3498db;
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+        
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .teacher-name {
+            font-weight: bold;
+            color: #2c3e50;
+            white-space: nowrap;
+        }
+        
+        .total-hours {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        
+        .course-info-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .course-column {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .course-item {
+            padding: 6px 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+        
+        .course-item:last-child {
+            border-bottom: none;
+        }
+        
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .btn-sort {
+            background-color: #2ecc71;
+        }
+        
+        .btn-reset {
+            background-color: #e74c3c;
+        }
+        
+        .btn-export {
+            background-color: #f39c12;
+        }
+        
+        .btn-add {
+            background-color: #9b59b6;
+        }
+        
+        .btn-remove {
+            background-color: #e74c3c;
+            padding: 2px 8px;
+            font-size: 12px;
+        }
+        
+        .btn-init {
+            background-color: #27ae60;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .grade-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 11px;
+            margin-right: 3px;
+        }
+        
+        .primary-school {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .middle-school {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .high-school {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .course-details {
+            font-size: 11px;
+            color: #7f8c8d;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+        
+        .error {
+            color: #e74c3c;
+            padding: 10px;
+            background-color: #fadbd8;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .success {
+            color: #27ae60;
+            padding: 10px;
+            background-color: #d5f4e6;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .init-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        @media (max-width: 1200px) {
+            .course-info-columns {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .coeff-container {
+                flex-direction: column;
+            }
+            
+            .batch-input-row, .save-load-buttons {
+                grid-template-columns: 1fr;
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .subject-item {
+                grid-template-columns: 1fr;
+                gap: 5px;
+            }
+            
+            .course-info-columns {
+                grid-template-columns: 1fr;
+            }
+            
+            th, td {
+                padding: 8px 10px;
+                font-size: 14px;
+            }
+            
+            .actions {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>教师课时量计算系统</h1>
+            <p class="subtitle">并列设置各学段学科系数，支持XLS格式导出</p>
+            <div class="formula">
+                <strong>计算公式：教师课时 = Σ(年级学科系数 × 课节)</strong><br>
+                示例：张三的课程为小学语文5节，初中语文6节，高中语文8节，他的课时 = 小学语文系数×5 + 初中语文系数×6 + 高中语文系数×8
+            </div>
+        </header>
+        
+        <div class="panel">
+            <h2>学科系数设置</h2>
+            
+            <div class="coeff-container">
+                <!-- 小学学科设置 -->
+                <div class="grade-section">
+                    <h3>小学学科系数</h3>
+                    <div class="batch-input-section">
+                        <h4>批量添加学科（系数相同）</h4>
+                        <div class="batch-input-row">
+                            <textarea id="primary-batch-subjects" placeholder="请输入学科名称，多个学科用顿号、隔开
+例如：语文、数学、英语、音乐、美术、体育"></textarea>
+                            <input type="number" id="primary-batch-coeff" step="0.1" min="0.1" max="5" placeholder="系数" value="1.0">
+                            <button class="btn-add" id="add-primary-batch">添加</button>
+                        </div>
+                        <p class="batch-help">提示：用中文顿号"、"、逗号","、分号";"或换行分隔多个学科</p>
+                    </div>
+                    
+                    <div class="subject-list">
+                        <div class="subject-item subject-item-header">
+                            <div>学科名称</div>
+                            <div>系数</div>
+                            <div>操作</div>
+                        </div>
+                        <div id="primary-subject-list">
+                            <!-- 小学学科列表将动态生成 -->
+                        </div>
+                    </div>
+                    <div class="clear-all">
+                        <button class="btn-remove btn-small" id="clear-primary">清空所有</button>
+                    </div>
+                </div>
+                
+                <!-- 初中学科设置 -->
+                <div class="grade-section">
+                    <h3>初中学科系数</h3>
+                    <div class="batch-input-section">
+                        <h4>批量添加学科（系数相同）</h4>
+                        <div class="batch-input-row">
+                            <textarea id="middle-batch-subjects" placeholder="请输入学科名称，多个学科用顿号、隔开
+例如：语文、数学、英语、物理、化学、生物"></textarea>
+                            <input type="number" id="middle-batch-coeff" step="0.1" min="0.1" max="5" placeholder="系数" value="1.0">
+                            <button class="btn-add" id="add-middle-batch">添加</button>
+                        </div>
+                        <p class="batch-help">提示：用中文顿号"、"、逗号","、分号";"或换行分隔多个学科</p>
+                    </div>
+                    
+                    <div class="subject-list">
+                        <div class="subject-item subject-item-header">
+                            <div>学科名称</div>
+                            <div>系数</div>
+                            <div>操作</div>
+                        </div>
+                        <div id="middle-subject-list">
+                            <!-- 初中学科列表将动态生成 -->
+                        </div>
+                    </div>
+                    <div class="clear-all">
+                        <button class="btn-remove btn-small" id="clear-middle">清空所有</button>
+                    </div>
+                </div>
+                
+                <!-- 高中学科设置 -->
+                <div class="grade-section">
+                    <h3>高中学科系数</h3>
+                    <div class="batch-input-section">
+                        <h4>批量添加学科（系数相同）</h4>
+                        <div class="batch-input-row">
+                            <textarea id="high-batch-subjects" placeholder="请输入学科名称，多个学科用顿号、隔开
+例如：语文、数学、英语、物理、化学、生物、政治、历史、地理"></textarea>
+                            <input type="number" id="high-batch-coeff" step="0.1" min="0.1" max="5" placeholder="系数" value="1.0">
+                            <button class="btn-add" id="add-high-batch">添加</button>
+                        </div>
+                        <p class="batch-help">提示：用中文顿号"、"、逗号","、分号";"或换行分隔多个学科</p>
+                    </div>
+                    
+                    <div class="subject-list">
+                        <div class="subject-item subject-item-header">
+                            <div>学科名称</div>
+                            <div>系数</div>
+                            <div>操作</div>
+                        </div>
+                        <div id="high-subject-list">
+                            <!-- 高中学科列表将动态生成 -->
+                        </div>
+                    </div>
+                    <div class="clear-all">
+                        <button class="btn-remove btn-small" id="clear-high">清空所有</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="save-load-section">
+                <h3>系数设置保存与加载</h3>
+                <div class="save-load-buttons">
+                    <button class="btn-save" id="saveSettingsBtn">保存当前系数设置</button>
+                    <button class="btn-load" id="loadSettingsBtn">加载已保存的系数设置</button>
+                    <button class="btn-export-settings" id="exportSettingsBtn">导出系数设置文件</button>
+                    <button class="btn-import-settings" id="importSettingsBtn">导入系数设置文件</button>
+                </div>
+                <div class="save-info">
+                    <p>最后保存时间：<span id="lastSaveTime" class="last-save-time">从未保存</span></p>
+                    <p>提示：保存的设置会存储在浏览器本地，即使刷新页面或关闭浏览器也不会丢失。</p>
+                </div>
+            </div>
+            
+            <div class="init-section">
+                <button class="btn-init" id="initDefaultBtn">一键初始化默认学科数据</button>
+                <p style="font-size: 12px; color: #666; margin-top: 5px;">点击此按钮将用预设的学科数据替换当前所有学科设置</p>
+            </div>
+            
+            <div class="success" id="successMsg"></div>
+        </div>
+        
+        <div class="panel upload-section">
+            <h2>上传课时文档</h2>
+            <p>请上传包含教师课时信息的文本文件（.txt格式）</p>
+            <div class="file-input">
+                <input type="file" id="fileInput" accept=".txt">
+            </div>
+            <button id="calculateBtn">计算课时量</button>
+            <div class="error" id="errorMsg"></div>
+        </div>
+        
+        <div class="loading" id="loading">
+            <p>正在计算课时量，请稍候...</p>
+        </div>
+        
+        <div class="panel" id="resultPanel" style="display: none;">
+            <h2>计算结果</h2>
+            <div class="actions">
+                <button class="btn-sort" id="sortByName">按姓名排序</button>
+                <button class="btn-sort" id="sortByHours">按课时量排序</button>
+                <button class="btn-export" id="exportBtn">导出XLS文件</button>
+                <button class="btn-reset" id="resetBtn">重置</button>
+            </div>
+            
+            <table id="resultTable">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">序号</th>
+                        <th style="width: 120px; min-width: 120px;">教师姓名</th>
+                        <th colspan="3" style="text-align: center;">任教信息</th>
+                        <th style="width: 100px;">课时量</th>
+                    </tr>
+                </thead>
+                <tbody id="resultBody">
+                    <!-- 结果将动态生成 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // 系数配置
+        let coefficients = {
+            subjects: {
+                'primary': {},   // 小学学科系数
+                'middle': {},    // 初中学科系数
+                'high': {}       // 高中学科系数
+            }
+        };
+        
+        // 教师数据存储
+        let teachersData = [];
+        let currentSort = 'name';
+        
+        // 存储键名
+        const STORAGE_KEY = 'teacher_hours_calculator_settings';
+        const LAST_SAVE_KEY = 'teacher_hours_calculator_last_save';
+        
+        // DOM元素
+        const fileInput = document.getElementById('fileInput');
+        const calculateBtn = document.getElementById('calculateBtn');
+        const loading = document.getElementById('loading');
+        const errorMsg = document.getElementById('errorMsg');
+        const successMsg = document.getElementById('successMsg');
+        const resultPanel = document.getElementById('resultPanel');
+        const resultBody = document.getElementById('resultBody');
+        const sortByNameBtn = document.getElementById('sortByName');
+        const sortByHoursBtn = document.getElementById('sortByHours');
+        const exportBtn = document.getElementById('exportBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const initDefaultBtn = document.getElementById('initDefaultBtn');
+        const lastSaveTime = document.getElementById('lastSaveTime');
+        
+        // 保存/加载相关元素
+        const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+        const loadSettingsBtn = document.getElementById('loadSettingsBtn');
+        const exportSettingsBtn = document.getElementById('exportSettingsBtn');
+        const importSettingsBtn = document.getElementById('importSettingsBtn');
+        
+        // 学科管理相关元素
+        const primaryBatchSubjects = document.getElementById('primary-batch-subjects');
+        const primaryBatchCoeff = document.getElementById('primary-batch-coeff');
+        const addPrimaryBatchBtn = document.getElementById('add-primary-batch');
+        const primarySubjectList = document.getElementById('primary-subject-list');
+        const clearPrimaryBtn = document.getElementById('clear-primary');
+        
+        const middleBatchSubjects = document.getElementById('middle-batch-subjects');
+        const middleBatchCoeff = document.getElementById('middle-batch-coeff');
+        const addMiddleBatchBtn = document.getElementById('add-middle-batch');
+        const middleSubjectList = document.getElementById('middle-subject-list');
+        const clearMiddleBtn = document.getElementById('clear-middle');
+        
+        const highBatchSubjects = document.getElementById('high-batch-subjects');
+        const highBatchCoeff = document.getElementById('high-batch-coeff');
+        const addHighBatchBtn = document.getElementById('add-high-batch');
+        const highSubjectList = document.getElementById('high-subject-list');
+        const clearHighBtn = document.getElementById('clear-high');
+        
+        // 默认学科设置
+        const defaultSubjects = {
+            'primary': {
+                '语文': 1.2,
+                '数学': 1.2,
+                '英语': 1.1,
+                '社会': 1.0,
+                '自然': 1.0,
+                '科学': 1.0,
+                '音乐': 0.9,
+                '美术': 0.9,
+                '体育': 0.9,
+                '手工': 0.8,
+                '美工': 0.8,
+                '乐理': 0.8,
+                '班队': 0.8,
+                '品德': 0.8,
+                '品生': 0.8,
+                '品社': 0.8,
+                '卫健': 0.8,
+                '体煅': 0.9,
+                '安全': 0.8,
+                '文体': 0.9
+            },
+            'middle': {
+                '语文': 1.3,
+                '数学': 1.3,
+                '英语': 1.2,
+                '社会': 1.1,
+                '自然': 1.1,
+                '科学': 1.1,
+                '音乐': 1.0,
+                '美术': 1.0,
+                '体育': 1.0
+            },
+            'high': {
+                '语文': 1.4,
+                '数学': 1.4,
+                '英语': 1.3,
+                '社会': 1.2,
+                '自然': 1.2,
+                '科学': 1.2,
+                '音乐': 1.1,
+                '美术': 1.1,
+                '体育': 1.1
+            }
+        };
+        
+        // 生成XLS文件 - 修复XLS格式问题
+        function generateXLSFile() {
+            if (teachersData.length === 0) {
+                showError('没有数据可导出');
+                return null;
+            }
+            
+            try {
+                // 使用正确的XLS文件格式
+                // Excel 97-2003 (.xls) 格式需要特定的MIME类型
+                let xlsContent = [
+                    '<?xml version="1.0"?>',
+                    '<?mso-application progid="Excel.Sheet"?>',
+                    '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"',
+                    ' xmlns:o="urn:schemas-microsoft-com:office:office"',
+                    ' xmlns:x="urn:schemas-microsoft-com:office:excel"',
+                    ' xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"',
+                    ' xmlns:html="http://www.w3.org/TR/REC-html40">',
+                    '<DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">',
+                    '<Title>教师课时量统计</Title>',
+                    '<Author>教师课时量计算系统</Author>',
+                    '<Created>' + new Date().toISOString() + '</Created>',
+                    '</DocumentProperties>',
+                    '<ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">',
+                    '<WindowHeight>9000</WindowHeight>',
+                    '<WindowWidth>13800</WindowWidth>',
+                    '<WindowTopX>240</WindowTopX>',
+                    '<WindowTopY>75</WindowTopY>',
+                    '<ProtectStructure>False</ProtectStructure>',
+                    '<ProtectWindows>False</ProtectWindows>',
+                    '</ExcelWorkbook>',
+                    '<Styles>',
+                    '<Style ss:ID="Default" ss:Name="Normal">',
+                    '<Alignment ss:Vertical="Bottom"/>',
+                    '<Borders/>',
+                    '<Font ss:FontName="宋体" x:CharSet="134" ss:Size="11" ss:Color="#000000"/>',
+                    '<Interior/>',
+                    '<NumberFormat/>',
+                    '<Protection/>',
+                    '</Style>',
+                    '<Style ss:ID="s1">',
+                    '<Font ss:FontName="宋体" x:CharSet="134" ss:Size="12" ss:Color="#FFFFFF" ss:Bold="1"/>',
+                    '<Interior ss:Color="#4F81BD" ss:Pattern="Solid"/>',
+                    '<Alignment ss:Vertical="Center" ss:Horizontal="Center"/>',
+                    '</Style>',
+                    '<Style ss:ID="s2">',
+                    '<Alignment ss:Vertical="Center" ss:Horizontal="Left" ss:WrapText="1"/>',
+                    '</Style>',
+                    '<Style ss:ID="s3">',
+                    '<Alignment ss:Vertical="Center" ss:Horizontal="Right"/>',
+                    '<NumberFormat ss:Format="0.00"/>',
+                    '</Style>',
+                    '</Styles>',
+                    '<Worksheet ss:Name="教师课时量">',
+                    '<Table ss:ExpandedColumnCount="3" ss:ExpandedRowCount="' + (teachersData.length + 1) + '" x:FullColumns="1" x:FullRows="1">',
+                    // 设置列宽
+                    '<Column ss:AutoFitWidth="0" ss:Width="120"/>', // A列：姓名
+                    '<Column ss:AutoFitWidth="0" ss:Width="80"/>',  // B列：课时量
+                    '<Column ss:AutoFitWidth="0" ss:Width="300"/>', // C列：任教信息
+                    
+                    // 表头
+                    '<Row>',
+                    '<Cell ss:StyleID="s1"><Data ss:Type="String">教师姓名</Data></Cell>',
+                    '<Cell ss:StyleID="s1"><Data ss:Type="String">课时量</Data></Cell>',
+                    '<Cell ss:StyleID="s1"><Data ss:Type="String">任教信息</Data></Cell>',
+                    '</Row>'
+                ];
+                
+                // 数据行
+                teachersData.forEach((teacher) => {
+                    const coursesText = teacher.courses.map(c => 
+                        `${c.className}【${c.courseName}】${c.hours}节`
+                    ).join('；');
+                    
+                    xlsContent.push(
+                        '<Row>',
+                        '<Cell><Data ss:Type="String">' + teacher.name + '</Data></Cell>',
+                        '<Cell ss:StyleID="s3"><Data ss:Type="Number">' + teacher.totalHours.toFixed(2) + '</Data></Cell>',
+                        '<Cell ss:StyleID="s2"><Data ss:Type="String">' + coursesText + '</Data></Cell>',
+                        '</Row>'
+                    );
+                });
+                
+                xlsContent.push(
+                    '</Table>',
+                    '<WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">',
+                    '<PageSetup>',
+                    '<Header x:Margin="0.3"/>',
+                    '<Footer x:Margin="0.3"/>',
+                    '<PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>',
+                    '</PageSetup>',
+                    '<Selected/>',
+                    '<Panes>',
+                    '<Pane>',
+                    '<Number>3</Number>',
+                    '</Pane>',
+                    '</Panes>',
+                    '<ProtectObjects>False</ProtectObjects>',
+                    '<ProtectScenarios>False</ProtectScenarios>',
+                    '</WorksheetOptions>',
+                    '</Worksheet>',
+                    '</Workbook>'
+                );
+                
+                return xlsContent.join('\n');
+            } catch (error) {
+                console.error('生成XLS文件时出错:', error);
+                showError('生成XLS文件失败：' + error.message);
+                return null;
+            }
+        }
+        
+        // 将课程列表分成三列
+        function splitCoursesIntoThreeColumns(courses) {
+            const totalCourses = courses.length;
+            const chunkSize = Math.ceil(totalCourses / 3);
+            
+            return {
+                column1: courses.slice(0, chunkSize),
+                column2: courses.slice(chunkSize, chunkSize * 2),
+                column3: courses.slice(chunkSize * 2)
+            };
+        }
+        
+        // 保存系数设置到本地存储
+        function saveSettings() {
+            try {
+                const settings = {
+                    subjects: coefficients.subjects,
+                    version: '1.0',
+                    timestamp: new Date().toISOString()
+                };
+                
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+                localStorage.setItem(LAST_SAVE_KEY, new Date().toLocaleString());
+                
+                updateLastSaveTime();
+                showSuccess('系数设置已成功保存到浏览器本地存储');
+                
+                return true;
+            } catch (error) {
+                showError('保存失败：' + error.message);
+                return false;
+            }
+        }
+        
+        // 从本地存储加载系数设置
+        function loadSettings() {
+            try {
+                const savedSettings = localStorage.getItem(STORAGE_KEY);
+                
+                if (!savedSettings) {
+                    showError('没有找到已保存的系数设置');
+                    return false;
+                }
+                
+                const settings = JSON.parse(savedSettings);
+                
+                // 验证数据结构
+                if (!settings.subjects || !settings.subjects.primary || !settings.subjects.middle || !settings.subjects.high) {
+                    showError('保存的数据格式不正确');
+                    return false;
+                }
+                
+                // 加载系数设置
+                coefficients.subjects = settings.subjects;
+                
+                // 重新渲染所有学科列表
+                renderSubjectList('primary');
+                renderSubjectList('middle');
+                renderSubjectList('high');
+                
+                updateLastSaveTime();
+                showSuccess('系数设置已成功从本地存储加载');
+                
+                return true;
+            } catch (error) {
+                showError('加载失败：' + error.message);
+                return false;
+            }
+        }
+        
+        // 导出系数设置为文件
+        function exportSettings() {
+            try {
+                const settings = {
+                    subjects: coefficients.subjects,
+                    version: '1.0',
+                    timestamp: new Date().toISOString(),
+                    description: '教师课时量计算系统 - 系数设置文件'
+                };
+                
+                const jsonString = JSON.stringify(settings, null, 2);
+                const blob = new Blob([jsonString], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `系数设置_${new Date().toISOString().slice(0, 10)}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                URL.revokeObjectURL(url);
+                
+                showSuccess('系数设置已导出为JSON文件');
+                return true;
+            } catch (error) {
+                showError('导出失败：' + error.message);
+                return false;
+            }
+        }
+        
+        // 导入系数设置文件
+        function importSettings() {
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = '.json';
+            
+            fileInput.onchange = function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    try {
+                        const content = e.target.result;
+                        const settings = JSON.parse(content);
+                        
+                        // 验证数据结构
+                        if (!settings.subjects || !settings.subjects.primary || !settings.subjects.middle || !settings.subjects.high) {
+                            showError('导入的文件格式不正确');
+                            return;
+                        }
+                        
+                        // 应用系数设置
+                        coefficients.subjects = settings.subjects;
+                        
+                        // 重新渲染所有学科列表
+                        renderSubjectList('primary');
+                        renderSubjectList('middle');
+                        renderSubjectList('high');
+                        
+                        // 更新最后保存时间
+                        const now = new Date().toLocaleString();
+                        localStorage.setItem(LAST_SAVE_KEY, now);
+                        updateLastSaveTime();
+                        
+                        showSuccess('系数设置已成功从文件导入');
+                    } catch (error) {
+                        showError('导入失败：' + error.message);
+                    }
+                };
+                
+                reader.onerror = function() {
+                    showError('文件读取失败');
+                };
+                
+                reader.readAsText(file);
+            };
+            
+            fileInput.click();
+        }
+        
+        // 更新最后保存时间显示
+        function updateLastSaveTime() {
+            const lastSave = localStorage.getItem(LAST_SAVE_KEY);
+            if (lastSave) {
+                lastSaveTime.textContent = lastSave;
+            } else {
+                lastSaveTime.textContent = '从未保存';
+            }
+        }
+        
+        // 初始化默认学科
+        function initDefaultSubjects() {
+            // 清空当前学科数据
+            coefficients.subjects = {
+                'primary': {},
+                'middle': {},
+                'high': {}
+            };
+            
+            // 初始化小学学科
+            for (const [subject, coeff] of Object.entries(defaultSubjects.primary)) {
+                coefficients.subjects.primary[subject] = coeff;
+            }
+            
+            // 初始化初中学科
+            for (const [subject, coeff] of Object.entries(defaultSubjects.middle)) {
+                coefficients.subjects.middle[subject] = coeff;
+            }
+            
+            // 初始化高中学科
+            for (const [subject, coeff] of Object.entries(defaultSubjects.high)) {
+                coefficients.subjects.high[subject] = coeff;
+            }
+            
+            // 渲染所有学科列表
+            renderSubjectList('primary');
+            renderSubjectList('middle');
+            renderSubjectList('high');
+        }
+        
+        // 批量添加学科
+        function addBatchSubjects(gradeLevel, subjectText, coeff) {
+            if (!subjectText) {
+                showError('请输入学科名称');
+                return {added: 0, existed: 0};
+            }
+            
+            // 使用顿号、逗号、分号或换行符分割学科
+            const subjects = subjectText.split(/[、,，;；\n]+/).map(s => s.trim()).filter(s => s);
+            
+            if (subjects.length === 0) {
+                showError('未找到有效的学科名称');
+                return {added: 0, existed: 0};
+            }
+            
+            let addedCount = 0;
+            let existedCount = 0;
+            const coefficient = parseFloat(coeff) || 1.0;
+            
+            subjects.forEach(subject => {
+                if (!coefficients.subjects[gradeLevel][subject]) {
+                    coefficients.subjects[gradeLevel][subject] = coefficient;
+                    addedCount++;
+                } else {
+                    existedCount++;
+                }
+            });
+            
+            renderSubjectList(gradeLevel);
+            
+            return {added: addedCount, existed: existedCount};
+        }
+        
+        // 删除学科
+        function removeSubject(gradeLevel, name) {
+            delete coefficients.subjects[gradeLevel][name];
+            renderSubjectList(gradeLevel);
+        }
+        
+        // 清空某个学段的所有学科
+        function clearAllSubjects(gradeLevel) {
+            if (confirm(`确定要清空所有${getGradeLevelName(gradeLevel)}学科吗？`)) {
+                coefficients.subjects[gradeLevel] = {};
+                renderSubjectList(gradeLevel);
+                showSuccess(`已清空所有${getGradeLevelName(gradeLevel)}学科`);
+            }
+        }
+        
+        // 获取学段名称
+        function getGradeLevelName(gradeLevel) {
+            switch(gradeLevel) {
+                case 'primary': return '小学';
+                case 'middle': return '初中';
+                case 'high': return '高中';
+                default: return '';
+            }
+        }
+        
+        // 渲染学科列表
+        function renderSubjectList(gradeLevel) {
+            let listElement;
+            
+            switch(gradeLevel) {
+                case 'primary':
+                    listElement = primarySubjectList;
+                    break;
+                case 'middle':
+                    listElement = middleSubjectList;
+                    break;
+                case 'high':
+                    listElement = highSubjectList;
+                    break;
+                default:
+                    return;
+            }
+            
+            listElement.innerHTML = '';
+            
+            const subjects = coefficients.subjects[gradeLevel];
+            const subjectNames = Object.keys(subjects).sort();
+            
+            if (subjectNames.length === 0) {
+                const emptyRow = document.createElement('div');
+                emptyRow.className = 'subject-item';
+                emptyRow.innerHTML = `
+                    <div colspan="3" style="text-align: center; color: #999; grid-column: 1 / 4;">暂无学科，请添加学科</div>
+                `;
+                listElement.appendChild(emptyRow);
+                return;
+            }
+            
+            subjectNames.forEach(name => {
+                const coeff = subjects[name];
+                const subjectItem = document.createElement('div');
+                subjectItem.className = 'subject-item';
+                subjectItem.innerHTML = `
+                    <div>${name}</div>
+                    <div>${coeff}</div>
+                    <div>
+                        <button class="btn-remove btn-small" onclick="removeSubjectByLevel('${gradeLevel}', '${name}')">删除</button>
+                    </div>
+                `;
+                listElement.appendChild(subjectItem);
+            });
+        }
+        
+        // 删除学科（供HTML调用的全局函数）
+        window.removeSubjectByLevel = function(gradeLevel, name) {
+            removeSubject(gradeLevel, name);
+        };
+        
+        // 批量添加小学学科按钮事件
+        addPrimaryBatchBtn.addEventListener('click', function() {
+            const result = addBatchSubjects('primary', primaryBatchSubjects.value.trim(), primaryBatchCoeff.value);
+            
+            if (result.added > 0 || result.existed > 0) {
+                primaryBatchSubjects.value = '';
+                let message = `成功添加${result.added}个小学学科`;
+                if (result.existed > 0) {
+                    message += `，${result.existed}个学科已存在（未覆盖）`;
+                }
+                showSuccess(message);
+            }
+        });
+        
+        // 批量添加初中学科按钮事件
+        addMiddleBatchBtn.addEventListener('click', function() {
+            const result = addBatchSubjects('middle', middleBatchSubjects.value.trim(), middleBatchCoeff.value);
+            
+            if (result.added > 0 || result.existed > 0) {
+                middleBatchSubjects.value = '';
+                let message = `成功添加${result.added}个初中学科`;
+                if (result.existed > 0) {
+                    message += `，${result.existed}个学科已存在（未覆盖）`;
+                }
+                showSuccess(message);
+            }
+        });
+        
+        // 批量添加高中学科按钮事件
+        addHighBatchBtn.addEventListener('click', function() {
+            const result = addBatchSubjects('high', highBatchSubjects.value.trim(), highBatchCoeff.value);
+            
+            if (result.added > 0 || result.existed > 0) {
+                highBatchSubjects.value = '';
+                let message = `成功添加${result.added}个高中学科`;
+                if (result.existed > 0) {
+                    message += `，${result.existed}个学科已存在（未覆盖）`;
+                }
+                showSuccess(message);
+            }
+        });
+        
+        // 清空学科按钮事件
+        clearPrimaryBtn.addEventListener('click', function() {
+            clearAllSubjects('primary');
+        });
+        
+        clearMiddleBtn.addEventListener('click', function() {
+            clearAllSubjects('middle');
+        });
+        
+        clearHighBtn.addEventListener('click', function() {
+            clearAllSubjects('high');
+        });
+        
+        // 保存设置按钮事件
+        saveSettingsBtn.addEventListener('click', function() {
+            saveSettings();
+        });
+        
+        // 加载设置按钮事件
+        loadSettingsBtn.addEventListener('click', function() {
+            loadSettings();
+        });
+        
+        // 导出设置按钮事件
+        exportSettingsBtn.addEventListener('click', function() {
+            exportSettings();
+        });
+        
+        // 导入设置按钮事件
+        importSettingsBtn.addEventListener('click', function() {
+            importSettings();
+        });
+        
+        // 初始化默认数据按钮事件
+        initDefaultBtn.addEventListener('click', function() {
+            if (confirm('是否要初始化默认学科数据？这将清除当前所有学科设置。')) {
+                initDefaultSubjects();
+                showSuccess('默认学科数据初始化完成');
+            }
+        });
+        
+        // 根据班级名称判断学段
+        function getGradeLevel(className) {
+            if (!className) return 'primary';
+            
+            // 初中
+            if (className.includes('初一') || className.includes('初二') || className.includes('初三')) {
+                return 'middle';
+            }
+            
+            // 高中
+            if (className.includes('高一') || className.includes('高二') || className.includes('高三')) {
+                return 'high';
+            }
+            
+            // 其他都认为是小学
+            return 'primary';
+        }
+        
+        // 获取课程系数
+        function getCourseCoefficient(courseName, className) {
+            const gradeLevel = getGradeLevel(className);
+            
+            // 如果没有设置该学科的系数，使用默认值1.0
+            if (!coefficients.subjects[gradeLevel] || !coefficients.subjects[gradeLevel][courseName]) {
+                return 1.0;
+            }
+            
+            return coefficients.subjects[gradeLevel][courseName];
+        }
+        
+        // 解析一行数据
+        function parseTeacherData(line) {
+            const parts = line.trim().split('\t').filter(part => part.trim() !== '');
+            if (parts.length === 0) return null;
+            
+            const teacher = {
+                name: parts[0],
+                courses: [],
+                totalHours: 0
+            };
+            
+            // 解析每个课程
+            for (let i = 1; i < parts.length; i++) {
+                const courseStr = parts[i];
+                // 匹配格式：四年1班【语文】8节
+                const match = courseStr.match(/(.+?)【(.+?)】(\d+)节/);
+                if (match) {
+                    const className = match[1]; // 四年1班
+                    const courseName = match[2]; // 语文
+                    const hours = parseInt(match[3]); // 8
+                    
+                    teacher.courses.push({
+                        className,
+                        courseName,
+                        hours
+                    });
+                }
+            }
+            
+            return teacher;
+        }
+        
+        // 计算教师课时量 - 使用新公式：课时 = Σ(年级学科系数 × 课节)
+        function calculateTeacherHours(teacher) {
+            let totalHours = 0;
+            
+            teacher.courses.forEach(course => {
+                const courseCoeff = getCourseCoefficient(course.courseName, course.className);
+                const weightedHours = course.hours * courseCoeff;
+                
+                totalHours += weightedHours;
+            });
+            
+            return parseFloat(totalHours.toFixed(2));
+        }
+        
+        // 显示错误信息
+        function showError(message) {
+            errorMsg.textContent = message;
+            errorMsg.style.display = 'block';
+            successMsg.style.display = 'none';
+            setTimeout(() => {
+                errorMsg.style.display = 'none';
+            }, 5000);
+        }
+        
+        // 显示成功信息
+        function showSuccess(message) {
+            successMsg.textContent = message;
+            successMsg.style.display = 'block';
+            errorMsg.style.display = 'none';
+            setTimeout(() => {
+                successMsg.style.display = 'none';
+            }, 3000);
+        }
+        
+        // 处理文件上传
+        calculateBtn.addEventListener('click', function() {
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showError('请先选择文件');
+                return;
+            }
+            
+            if (file.type !== 'text/plain' && !file.name.endsWith('.txt')) {
+                showError('请上传.txt格式的文本文件');
+                return;
+            }
+            
+            loading.style.display = 'block';
+            resultPanel.style.display = 'none';
+            
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const content = e.target.result;
+                    teachersData = [];
+                    
+                    // 按行分割
+                    const lines = content.split('\n');
+                    
+                    // 解析每一行
+                    lines.forEach((line, index) => {
+                        if (line.trim()) {
+                            const teacher = parseTeacherData(line);
+                            if (teacher) {
+                                teacher.totalHours = calculateTeacherHours(teacher);
+                                teachersData.push(teacher);
+                            }
+                        }
+                    });
+                    
+                    if (teachersData.length === 0) {
+                        showError('未找到有效的教师数据');
+                        loading.style.display = 'none';
+                        return;
+                    }
+                    
+                    // 显示结果
+                    displayResults();
+                    loading.style.display = 'none';
+                    resultPanel.style.display = 'block';
+                    
+                } catch (error) {
+                    console.error(error);
+                    showError('文件解析错误：' + error.message);
+                    loading.style.display = 'none';
+                }
+            };
+            
+            reader.onerror = function() {
+                showError('文件读取失败');
+                loading.style.display = 'none';
+            };
+            
+            reader.readAsText(file);
+        });
+        
+        // 显示结果
+        function displayResults() {
+            // 排序
+            sortTeachers();
+            
+            // 清空表格
+            resultBody.innerHTML = '';
+            
+            // 填充表格
+            teachersData.forEach((teacher, index) => {
+                const row = document.createElement('tr');
+                
+                // 序号
+                const indexCell = document.createElement('td');
+                indexCell.textContent = index + 1;
+                row.appendChild(indexCell);
+                
+                // 姓名
+                const nameCell = document.createElement('td');
+                nameCell.innerHTML = `<span class="teacher-name">${teacher.name}</span>`;
+                row.appendChild(nameCell);
+                
+                // 任教信息分为三列显示
+                const coursesColumns = splitCoursesIntoThreeColumns(teacher.courses);
+                
+                // 第一列任教信息
+                const info1Cell = document.createElement('td');
+                let info1Html = '';
+                
+                if (coursesColumns.column1.length > 0) {
+                    coursesColumns.column1.forEach(course => {
+                        const courseCoeff = getCourseCoefficient(course.courseName, course.className);
+                        const weightedHours = (course.hours * courseCoeff).toFixed(2);
+                        const gradeLevel = getGradeLevel(course.className);
+                        
+                        // 确定年级标签样式
+                        let gradeClass = 'primary-school';
+                        if (gradeLevel === 'middle') {
+                            gradeClass = 'middle-school';
+                        } else if (gradeLevel === 'high') {
+                            gradeClass = 'high-school';
+                        }
+                        
+                        info1Html += `
+                            <div class="course-item">
+                                <span class="grade-badge ${gradeClass}">${course.className}</span>
+                                ${course.courseName} ${course.hours}节
+                                <span class="course-details">(系数:${courseCoeff}，加权:${weightedHours})</span>
+                            </div>
+                        `;
+                    });
+                }
+                
+                info1Cell.innerHTML = info1Html;
+                row.appendChild(info1Cell);
+                
+                // 第二列任教信息
+                const info2Cell = document.createElement('td');
+                let info2Html = '';
+                
+                if (coursesColumns.column2.length > 0) {
+                    coursesColumns.column2.forEach(course => {
+                        const courseCoeff = getCourseCoefficient(course.courseName, course.className);
+                        const weightedHours = (course.hours * courseCoeff).toFixed(2);
+                        const gradeLevel = getGradeLevel(course.className);
+                        
+                        // 确定年级标签样式
+                        let gradeClass = 'primary-school';
+                        if (gradeLevel === 'middle') {
+                            gradeClass = 'middle-school';
+                        } else if (gradeLevel === 'high') {
+                            gradeClass = 'high-school';
+                        }
+                        
+                        info2Html += `
+                            <div class="course-item">
+                                <span class="grade-badge ${gradeClass}">${course.className}</span>
+                                ${course.courseName} ${course.hours}节
+                                <span class="course-details">(系数:${courseCoeff}，加权:${weightedHours})</span>
+                            </div>
+                        `;
+                    });
+                }
+                
+                info2Cell.innerHTML = info2Html;
+                row.appendChild(info2Cell);
+                
+                // 第三列任教信息
+                const info3Cell = document.createElement('td');
+                let info3Html = '';
+                
+                if (coursesColumns.column3.length > 0) {
+                    coursesColumns.column3.forEach(course => {
+                        const courseCoeff = getCourseCoefficient(course.courseName, course.className);
+                        const weightedHours = (course.hours * courseCoeff).toFixed(2);
+                        const gradeLevel = getGradeLevel(course.className);
+                        
+                        // 确定年级标签样式
+                        let gradeClass = 'primary-school';
+                        if (gradeLevel === 'middle') {
+                            gradeClass = 'middle-school';
+                        } else if (gradeLevel === 'high') {
+                            gradeClass = 'high-school';
+                        }
+                        
+                        info3Html += `
+                            <div class="course-item">
+                                <span class="grade-badge ${gradeClass}">${course.className}</span>
+                                ${course.courseName} ${course.hours}节
+                                <span class="course-details">(系数:${courseCoeff}，加权:${weightedHours})</span>
+                            </div>
+                        `;
+                    });
+                }
+                
+                info3Cell.innerHTML = info3Html;
+                row.appendChild(info3Cell);
+                
+                // 总课时量
+                const hoursCell = document.createElement('td');
+                hoursCell.innerHTML = `<span class="total-hours">${teacher.totalHours.toFixed(2)}</span>`;
+                row.appendChild(hoursCell);
+                
+                resultBody.appendChild(row);
+            });
+        }
+        
+        // 排序教师
+        function sortTeachers() {
+            if (currentSort === 'name') {
+                teachersData.sort((a, b) => a.name.localeCompare(b.name, 'zh-CN'));
+            } else {
+                teachersData.sort((a, b) => b.totalHours - a.totalHours);
+            }
+        }
+        
+        // 排序按钮事件
+        sortByNameBtn.addEventListener('click', function() {
+            currentSort = 'name';
+            displayResults();
+        });
+        
+        sortByHoursBtn.addEventListener('click', function() {
+            currentSort = 'hours';
+            displayResults();
+        });
+        
+        // 导出数据
+        exportBtn.addEventListener('click', function() {
+            if (teachersData.length === 0) {
+                showError('没有数据可导出');
+                return;
+            }
+            
+            // 导出XLS格式
+            const xlsContent = generateXLSFile();
+            if (!xlsContent) return;
+            
+            // 使用正确的MIME类型
+            const blob = new Blob([xlsContent], { 
+                type: 'application/vnd.ms-excel;charset=utf-8' 
+            });
+            const url = URL.createObjectURL(blob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `教师课时量_${new Date().toISOString().slice(0, 10)}.xls`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            URL.revokeObjectURL(url);
+            
+            showSuccess('数据已成功导出为XLS文件，文件格式已修复，可在Excel 2007中正常打开。');
+        });
+        
+        // 重置
+        resetBtn.addEventListener('click', function() {
+            fileInput.value = '';
+            teachersData = [];
+            resultPanel.style.display = 'none';
+            showSuccess('已重置，可以上传新文件进行计算');
+        });
+        
+        // 页面加载时初始化
+        window.addEventListener('DOMContentLoaded', function() {
+            // 更新最后保存时间显示
+            updateLastSaveTime();
+            
+            // 尝试自动加载已保存的设置
+            const savedSettings = localStorage.getItem(STORAGE_KEY);
+            if (savedSettings) {
+                // 询问用户是否要加载已保存的设置
+                if (confirm('检测到已保存的系数设置，是否要自动加载？')) {
+                    loadSettings();
+                } else {
+                    // 加载默认设置
+                    initDefaultSubjects();
+                }
+            } else {
+                // 加载默认设置
+                initDefaultSubjects();
+            }
+            
+            // 为批量输入框添加示例数据
+            primaryBatchSubjects.value = '语文、数学、英语、音乐、美术、体育';
+            primaryBatchCoeff.value = '1.0';
+            
+            middleBatchSubjects.value = '语文、数学、英语、物理、化学、生物';
+            middleBatchCoeff.value = '1.0';
+            
+            highBatchSubjects.value = '语文、数学、英语、物理、化学、生物、政治、历史、地理';
+            highBatchCoeff.value = '1.0';
+        });
+    </script>
+</body>
+</html>
